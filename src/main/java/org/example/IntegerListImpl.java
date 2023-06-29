@@ -1,13 +1,14 @@
 
 package org.example;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class IntegerListImpl implements IntegerList {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 10;
 
-    private final Integer[] data;
+    private Integer[] data;
     private int size;
 
 
@@ -28,6 +29,9 @@ public class IntegerListImpl implements IntegerList {
     public Integer add(int index, Integer item) {
         checkItem(item);
         checkIndex(index, true);
+        if (size >= data.length) {
+            grow();
+        }
         if (size < data.length) {
             if (index < size) {
                 System.arraycopy(data, index, data, index + 1, size - index);
@@ -38,6 +42,12 @@ public class IntegerListImpl implements IntegerList {
         } else {
             throw new IllegalArgumentException("Список полон!");
         }
+    }
+
+    private void grow() {
+        Integer[] data = new Integer[(int) (this.data.length * 1.5)];
+        System.arraycopy(this.data, 0,  data, 0, this.data.length);
+        this.data = data;
     }
 
     @Override
@@ -70,7 +80,8 @@ public class IntegerListImpl implements IntegerList {
         checkItem(item);
 
         Integer[] copy = toArray();
-        sortInsertion(copy);
+//        sortInsertion(copy);
+        quickSort(copy);
 
         int min = 0;
         int max = copy.length - 1;
@@ -89,16 +100,51 @@ public class IntegerListImpl implements IntegerList {
         return false;
     }
 
-    private static void sortInsertion(Integer[] arr) {
-        for (int i = 1; i < arr.length; i++) {
-            int temp = arr[i];
-            int j = i;
-            while (j > 0 && arr[j - 1] >= temp) {
-                arr[j] = arr[j - 1];
-                j--;
-            }
-            arr[j] = temp;
+//    private static void sortInsertion(Integer[] arr) {
+//        for (int i = 1; i < arr.length; i++) {
+//            int temp = arr[i];
+//            int j = i;
+//            while (j > 0 && arr[j - 1] >= temp) {
+//                arr[j] = arr[j - 1];
+//                j--;
+//            }
+//            arr[j] = temp;
+//        }
+//    }
+
+    private void quickSort(Integer[] arr) {
+        quickSort(arr, 0, arr.length - 1);
+    }
+
+    public static void quickSort(Integer[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, end);
         }
+    }
+
+    private static int partition(Integer[] arr, int begin, int end) {
+        Integer pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
+    private static void swapElements(Integer[] arr, int left, int right) {
+        Integer temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
     }
 
     @Override
